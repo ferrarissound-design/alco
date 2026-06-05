@@ -1,33 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const DRINKS = [
-  { key: "beer",   label: "ビール",              sub: "350ml / 5%",  ml: 350, pct: 0.05 },
-  { key: "chu5",   label: "チューハイ 5%",        sub: "350ml / 5%",  ml: 350, pct: 0.05 },
-  { key: "chu9",   label: "チューハイ 9%",        sub: "500ml / 9%",  ml: 500, pct: 0.09, strong: true },
-  { key: "wine",   label: "ワイン",               sub: "120ml / 12%", ml: 120, pct: 0.12 },
-  { key: "sake",   label: "日本酒",               sub: "180ml / 15%", ml: 180, pct: 0.15 },
-  { key: "whisky", label: "ウイスキー",            sub: "30ml / 40%",  ml: 30,  pct: 0.40 },
+  { key: "beer",   label: "Beer",        sub: "350ml · 5%",  ml: 350, pct: 0.05 },
+  { key: "chu5",   label: "Highball 5%", sub: "350ml · 5%",  ml: 350, pct: 0.05 },
+  { key: "chu9",   label: "Highball 9%", sub: "500ml · 9%",  ml: 500, pct: 0.09, strong: true },
+  { key: "wine",   label: "Wine",        sub: "120ml · 12%", ml: 120, pct: 0.12 },
+  { key: "sake",   label: "Sake",        sub: "180ml · 15%", ml: 180, pct: 0.15 },
+  { key: "whisky", label: "Whisky",      sub: "30ml · 40%",  ml: 30,  pct: 0.40 },
 ];
 
-const TIMES = ["19〜21時", "21〜23時", "23時以降", "深夜0時以降"];
-const MOODS = [
-  { key: "great",  label: "絶好調", icon: "😄" },
-  { key: "ok",     label: "まあまあ", icon: "😐" },
-  { key: "tired",  label: "眠い",   icon: "😴" },
-  { key: "bad",    label: "つらい", icon: "🤕" },
+const TIMES    = ["7 – 9 PM", "9 – 11 PM", "After 11 PM", "After midnight"];
+const MOODS    = [
+  { key: "great", label: "Great"  },
+  { key: "ok",    label: "Fine"   },
+  { key: "tired", label: "Tired"  },
+  { key: "bad",   label: "Rough"  },
 ];
-const SYMPTOMS = ["頭痛", "胃もたれ", "だるい", "口が乾く", "なし"];
-const FOCUS    = ["低", "やや低", "普通", "高い"];
+const SYMPTOMS = ["Headache", "Nausea", "Fatigue", "Dry mouth", "None"];
+const FOCUS    = ["Low", "Below avg", "Average", "High"];
 
 function calcAlcohol(counts) {
   return DRINKS.reduce((sum, d) => sum + (counts[d.key] || 0) * Math.round(d.ml * d.pct * 0.8), 0);
 }
 
 function alcoholComment(g) {
-  if (g === 0)  return { text: "適量の目安は 20g / 日", color: "#888" };
-  if (g <= 20)  return { text: "適量範囲内です",         color: "#1a9e60" };
-  if (g <= 40)  return { text: "少し多めです",           color: "#c97a00" };
-  return              { text: "飲みすぎかも",            color: "#c0392b" };
+  if (g === 0)  return { text: "Recommended limit: 20g / day", color: "#aaa" };
+  if (g <= 20)  return { text: "Within recommended range",     color: "#2d8a5e" };
+  if (g <= 40)  return { text: "Slightly over",                color: "#b07000" };
+  return              { text: "Exceeding the limit",           color: "#b03030" };
 }
 
 function todayKey() {
@@ -35,48 +35,84 @@ function todayKey() {
 }
 function yesterdayLabel() {
   const d = new Date(); d.setDate(d.getDate() - 1);
-  return d.toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "short" });
+  return d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 function todayLabel() {
-  return new Date().toLocaleDateString("ja-JP", { month: "long", day: "numeric", weekday: "short" });
+  return new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 }
 
-const base = {
+const wrap = {
   fontFamily: "'Helvetica Neue', Arial, sans-serif",
   minHeight: "100vh",
-  background: "#f5f4f0",
+  background: "#f5f5f3",
   display: "flex",
   justifyContent: "center",
-  padding: "32px 16px 64px",
+  padding: "40px 16px 80px",
 };
 
 const card = {
   background: "#fff",
-  borderRadius: 16,
-  border: "0.5px solid rgba(0,0,0,0.1)",
-  padding: "32px 24px 36px",
+  borderRadius: 12,
+  border: "1px solid rgba(0,0,0,0.07)",
+  padding: "36px 28px 40px",
   width: "100%",
   maxWidth: 360,
+  alignSelf: "flex-start",
+};
+
+const eyebrow = {
+  fontSize: 10,
+  letterSpacing: "0.14em",
+  color: "#bbb",
+  textTransform: "uppercase",
+  margin: "0 0 6px",
+};
+
+const heading = {
+  fontSize: 22,
+  fontWeight: 400,
+  color: "#111",
+  margin: "0 0 32px",
+  lineHeight: 1.35,
+  letterSpacing: "-0.01em",
 };
 
 const sectionLabel = {
-  fontSize: 10,
-  letterSpacing: "0.1em",
-  color: "#aaa",
+  fontSize: 9,
+  letterSpacing: "0.16em",
+  color: "#bbb",
   textTransform: "uppercase",
-  marginBottom: 12,
+  marginBottom: 14,
 };
 
-const divider = {
+const rule = {
   border: "none",
-  borderTop: "0.5px solid rgba(0,0,0,0.08)",
-  margin: "24px 0",
+  borderTop: "1px solid rgba(0,0,0,0.06)",
+  margin: "28px 0",
+};
+
+const btnBase = {
+  padding: "10px 0",
+  borderRadius: 6,
+  border: "1px solid rgba(0,0,0,0.1)",
+  background: "transparent",
+  fontSize: 12,
+  color: "#888",
+  cursor: "pointer",
+  letterSpacing: "0.02em",
+};
+
+const btnActive = {
+  ...btnBase,
+  border: "1px solid #111",
+  color: "#111",
+  fontWeight: 500,
 };
 
 function DrinkScreen({ onSave }) {
   const [counts, setCounts] = useState({});
-  const [time, setTime]     = useState(null);
-  const [saved, setSaved]   = useState(false);
+  const [time,   setTime]   = useState(null);
+  const [saved,  setSaved]  = useState(false);
 
   const total   = calcAlcohol(counts);
   const comment = alcoholComment(total);
@@ -95,63 +131,62 @@ function DrinkScreen({ onSave }) {
   }
 
   return (
-    <div style={base}>
+    <div style={wrap}>
       <div style={card}>
-        <p style={{ fontSize: 11, letterSpacing: "0.08em", color: "#bbb", margin: "0 0 4px", textTransform: "uppercase" }}>
-          {yesterdayLabel()} — 昨夜
-        </p>
-        <p style={{ fontSize: 22, fontWeight: 500, margin: "0 0 28px", color: "#111", lineHeight: 1.3 }}>
-          何を飲みましたか？
-        </p>
+        <p style={eyebrow}>{yesterdayLabel()} — Last night</p>
+        <p style={heading}>What did you drink?</p>
 
-        <hr style={divider} />
-
-        <p style={sectionLabel}>種類と本数</p>
+        <hr style={rule} />
+        <p style={sectionLabel}>Drinks</p>
 
         {DRINKS.map(d => {
           const cnt = counts[d.key] || 0;
           return (
-            <div key={d.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "11px 0", borderBottom: "0.5px solid rgba(0,0,0,0.06)" }}>
+            <div key={d.key} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 0", borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
               <div>
-                <span style={{ fontSize: 14, color: "#111" }}>{d.label}</span>
-                {d.strong && (
-                  <span style={{ fontSize: 10, color: "#c97a00", border: "0.5px solid #c97a00", borderRadius: 4, padding: "1px 5px", marginLeft: 6 }}>STRONG</span>
-                )}
-                <div style={{ fontSize: 11, color: "#bbb", marginTop: 2 }}>{d.sub}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 14, color: "#111", letterSpacing: "-0.01em" }}>{d.label}</span>
+                  {d.strong && (
+                    <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#b07000", border: "1px solid #b07000", borderRadius: 3, padding: "1px 5px", textTransform: "uppercase" }}>Strong</span>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: "#ccc", marginTop: 3, letterSpacing: "0.02em" }}>{d.sub}</div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                <button onClick={() => change(d.key, -1)} style={{ width: 28, height: 28, borderRadius: "50%", border: "0.5px solid rgba(0,0,0,0.15)", background: "transparent", fontSize: 16, color: "#888", cursor: "pointer" }}>−</button>
-                <span style={{ fontSize: 18, fontWeight: cnt > 0 ? 500 : 400, color: cnt > 0 ? "#111" : "#ccc", minWidth: 18, textAlign: "center" }}>{cnt}</span>
-                <button onClick={() => change(d.key, 1)}  style={{ width: 28, height: 28, borderRadius: "50%", border: "0.5px solid rgba(0,0,0,0.15)", background: "transparent", fontSize: 16, color: "#888", cursor: "pointer" }}>+</button>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <button onClick={() => change(d.key, -1)} style={{ width: 26, height: 26, borderRadius: "50%", border: "1px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: 15, lineHeight: 1, color: "#999", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                <span style={{ fontSize: 17, fontWeight: cnt > 0 ? 500 : 400, color: cnt > 0 ? "#111" : "#ddd", minWidth: 16, textAlign: "center" }}>{cnt}</span>
+                <button onClick={() => change(d.key, 1)}  style={{ width: 26, height: 26, borderRadius: "50%", border: "1px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: 15, lineHeight: 1, color: "#999", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
               </div>
             </div>
           );
         })}
 
-        <div style={{ paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-          <span style={{ fontSize: 12, color: "#888" }}>純アルコール量</span>
+        <div style={{ paddingTop: 16, display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <span style={{ fontSize: 11, color: "#bbb", letterSpacing: "0.04em" }}>Pure alcohol</span>
           <span>
-            <span style={{ fontSize: 20, fontWeight: 500, color: "#111" }}>{total}</span>
-            <span style={{ fontSize: 12, color: "#888", marginLeft: 3 }}>g</span>
+            <span style={{ fontSize: 20, fontWeight: 400, color: "#111", letterSpacing: "-0.02em" }}>{total}</span>
+            <span style={{ fontSize: 11, color: "#bbb", marginLeft: 3 }}>g</span>
           </span>
         </div>
-        <div style={{ textAlign: "right", marginTop: 3 }}>
-          <span style={{ fontSize: 11, color: comment.color }}>{comment.text}</span>
+        <div style={{ textAlign: "right", marginTop: 4 }}>
+          <span style={{ fontSize: 11, color: comment.color, letterSpacing: "0.02em" }}>{comment.text}</span>
         </div>
 
-        <hr style={divider} />
-
-        <p style={sectionLabel}>飲んだ時間帯</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 7, marginBottom: 28 }}>
+        <hr style={rule} />
+        <p style={sectionLabel}>Time</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 32 }}>
           {TIMES.map(t => (
-            <button key={t} onClick={() => setTime(t)} style={{ padding: "10px 0", borderRadius: 8, border: time === t ? "1px solid #111" : "0.5px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: 12, color: time === t ? "#111" : "#888", fontWeight: time === t ? 500 : 400, cursor: "pointer" }}>
+            <button key={t} onClick={() => setTime(t)} style={time === t ? btnActive : btnBase}>
               {t}
             </button>
           ))}
         </div>
 
-        <button onClick={handleSave} style={{ width: "100%", padding: 14, borderRadius: 8, border: "0.5px solid #111", background: saved ? "#111" : "transparent", color: saved ? "#fff" : "#111", fontSize: 14, letterSpacing: "0.04em", cursor: "pointer", transition: "background 0.2s, color 0.2s" }}>
-          {saved ? "記録しました" : "記録する"}
+        <button
+          onClick={handleSave}
+          style={{ width: "100%", padding: 14, borderRadius: 6, border: "1px solid #111", background: saved ? "#111" : "transparent", color: saved ? "#fff" : "#111", fontSize: 13, letterSpacing: "0.06em", cursor: "pointer", transition: "background 0.25s, color 0.25s", textTransform: "uppercase" }}
+        >
+          {saved ? "Saved" : "Save"}
         </button>
       </div>
     </div>
@@ -178,52 +213,49 @@ function MorningScreen({ onDone }) {
   }
 
   return (
-    <div style={base}>
+    <div style={wrap}>
       <div style={card}>
-        <p style={{ fontSize: 11, letterSpacing: "0.08em", color: "#bbb", margin: "0 0 4px", textTransform: "uppercase" }}>
-          {todayLabel()}
-        </p>
-        <p style={{ fontSize: 22, fontWeight: 500, margin: "0 0 28px", color: "#111", lineHeight: 1.3 }}>
-          Good morning.
-        </p>
+        <p style={eyebrow}>{todayLabel()}</p>
+        <p style={heading}>Good morning.</p>
 
-        <hr style={divider} />
-
-        <p style={sectionLabel}>今日の調子</p>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 24 }}>
+        <hr style={rule} />
+        <p style={sectionLabel}>Condition</p>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6, marginBottom: 28 }}>
           {MOODS.map(m => (
-            <button key={m.key} onClick={() => setMood(m.key)} style={{ padding: "14px 8px", borderRadius: 8, border: mood === m.key ? "1px solid #111" : "0.5px solid rgba(0,0,0,0.1)", background: "transparent", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-              <span style={{ fontSize: 22 }}>{m.icon}</span>
-              <span style={{ fontSize: 12, color: mood === m.key ? "#111" : "#888", fontWeight: mood === m.key ? 500 : 400 }}>{m.label}</span>
+            <button key={m.key} onClick={() => setMood(m.key)} style={mood === m.key ? { ...btnActive, padding: "14px 8px" } : { ...btnBase, padding: "14px 8px" }}>
+              {m.label}
             </button>
           ))}
         </div>
 
-        <p style={sectionLabel}>症状</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+        <p style={sectionLabel}>Symptoms</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 28 }}>
           {SYMPTOMS.map(s => {
             const on = symptoms.includes(s);
             return (
-              <button key={s} onClick={() => toggleSymptom(s)} style={{ padding: "6px 14px", borderRadius: 20, border: on ? "1px solid #111" : "0.5px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: 13, color: on ? "#111" : "#888", cursor: "pointer" }}>
+              <button key={s} onClick={() => toggleSymptom(s)} style={{ padding: "6px 14px", borderRadius: 20, border: on ? "1px solid #111" : "1px solid rgba(0,0,0,0.1)", background: "transparent", fontSize: 12, color: on ? "#111" : "#aaa", cursor: "pointer", letterSpacing: "0.02em" }}>
                 {s}
               </button>
             );
           })}
         </div>
 
-        <p style={sectionLabel}>集中力</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0,1fr))", gap: 6, marginBottom: 28 }}>
+        <p style={sectionLabel}>Focus</p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 5, marginBottom: 32 }}>
           {FOCUS.map(f => (
-            <button key={f} onClick={() => setFocus(f)} style={{ padding: "10px 0", borderRadius: 8, border: focus === f ? "1px solid #111" : "0.5px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: 12, color: focus === f ? "#111" : "#888", fontWeight: focus === f ? 500 : 400, cursor: "pointer" }}>
+            <button key={f} onClick={() => setFocus(f)} style={focus === f ? { ...btnActive, fontSize: 11 } : { ...btnBase, fontSize: 11 }}>
               {f}
             </button>
           ))}
         </div>
 
-        <button onClick={handleSave} style={{ width: "100%", padding: 14, borderRadius: 8, border: "0.5px solid #111", background: saved ? "#111" : "transparent", color: saved ? "#fff" : "#111", fontSize: 14, letterSpacing: "0.04em", cursor: "pointer", transition: "background 0.2s, color 0.2s" }}>
-          {saved ? "記録しました" : "記録する"}
+        <button
+          onClick={handleSave}
+          style={{ width: "100%", padding: 14, borderRadius: 6, border: "1px solid #111", background: saved ? "#111" : "transparent", color: saved ? "#fff" : "#111", fontSize: 13, letterSpacing: "0.06em", cursor: "pointer", transition: "background 0.25s, color 0.25s", textTransform: "uppercase" }}
+        >
+          {saved ? "Saved" : "Save"}
         </button>
-        <p style={{ textAlign: "center", fontSize: 11, color: "#ccc", marginTop: 8 }}>所要時間：約20秒</p>
+        <p style={{ textAlign: "center", fontSize: 10, color: "#ddd", marginTop: 10, letterSpacing: "0.06em" }}>Takes about 20 seconds</p>
       </div>
     </div>
   );
@@ -231,13 +263,17 @@ function MorningScreen({ onDone }) {
 
 function CompleteScreen({ onReset }) {
   return (
-    <div style={{ ...base, alignItems: "center" }}>
-      <div style={{ ...card, textAlign: "center", padding: "48px 24px" }}>
-        <p style={{ fontSize: 32, marginBottom: 16 }}>✓</p>
-        <p style={{ fontSize: 20, fontWeight: 500, color: "#111", marginBottom: 8 }}>記録完了</p>
-        <p style={{ fontSize: 13, color: "#aaa", marginBottom: 32 }}>データが蓄積されると<br />相関グラフが見えてくるよ</p>
-        <button onClick={onReset} style={{ padding: "10px 28px", borderRadius: 8, border: "0.5px solid rgba(0,0,0,0.15)", background: "transparent", fontSize: 13, color: "#888", cursor: "pointer" }}>
-          最初に戻る
+    <div style={{ ...wrap, alignItems: "center" }}>
+      <div style={{ ...card, textAlign: "center", padding: "56px 28px" }}>
+        <div style={{ width: 32, height: 32, borderRadius: "50%", border: "1px solid #111", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <polyline points="1.5,6 4.5,9 10.5,3" stroke="#111" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <p style={{ fontSize: 18, fontWeight: 400, color: "#111", margin: "0 0 10px", letterSpacing: "-0.01em" }}>Logged.</p>
+        <p style={{ fontSize: 12, color: "#bbb", margin: "0 0 36px", lineHeight: 1.7, letterSpacing: "0.02em" }}>Patterns emerge<br />as data accumulates.</p>
+        <button onClick={onReset} style={{ padding: "9px 24px", borderRadius: 6, border: "1px solid rgba(0,0,0,0.12)", background: "transparent", fontSize: 11, color: "#aaa", cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          Start over
         </button>
       </div>
     </div>
@@ -246,23 +282,23 @@ function CompleteScreen({ onReset }) {
 
 function HomeScreen({ onDrink, onMorning }) {
   return (
-    <div style={{ ...base, alignItems: "flex-start" }}>
-      <div style={{ ...card }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.08em", color: "#bbb", margin: "0 0 4px", textTransform: "uppercase" }}>Drink Log</p>
-        <p style={{ fontSize: 22, fontWeight: 500, color: "#111", margin: "0 0 6px" }}>飲酒×コンディション</p>
-        <p style={{ fontSize: 13, color: "#aaa", margin: "0 0 32px" }}>記録を続けると、自分のパターンが見えてくる。</p>
+    <div style={wrap}>
+      <div style={card}>
+        <p style={eyebrow}>Drink Log</p>
+        <p style={{ fontSize: 22, fontWeight: 400, color: "#111", margin: "0 0 8px", letterSpacing: "-0.01em" }}>Alcohol & Recovery</p>
+        <p style={{ fontSize: 12, color: "#bbb", margin: "0 0 36px", lineHeight: 1.7, letterSpacing: "0.02em" }}>Track what you drink.<br />Understand how you feel.</p>
 
-        <hr style={divider} />
+        <hr style={rule} />
+        <p style={sectionLabel}>Log</p>
 
-        <p style={sectionLabel}>記録する</p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <button onClick={onDrink} style={{ width: "100%", padding: "16px 20px", borderRadius: 10, border: "0.5px solid rgba(0,0,0,0.12)", background: "transparent", textAlign: "left", cursor: "pointer" }}>
-            <p style={{ fontSize: 15, fontWeight: 500, color: "#111", margin: "0 0 2px" }}>🍺 昨夜の飲酒</p>
-            <p style={{ fontSize: 12, color: "#aaa", margin: 0 }}>種類・本数・時間帯を入力</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <button onClick={onDrink} style={{ width: "100%", padding: "18px 20px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "transparent", textAlign: "left", cursor: "pointer" }}>
+            <p style={{ fontSize: 14, fontWeight: 500, color: "#111", margin: "0 0 3px", letterSpacing: "-0.01em" }}>Last night's drinks</p>
+            <p style={{ fontSize: 11, color: "#bbb", margin: 0, letterSpacing: "0.02em" }}>Type, count, and timing</p>
           </button>
-          <button onClick={onMorning} style={{ width: "100%", padding: "16px 20px", borderRadius: 10, border: "0.5px solid rgba(0,0,0,0.12)", background: "transparent", textAlign: "left", cursor: "pointer" }}>
-            <p style={{ fontSize: 15, fontWeight: 500, color: "#111", margin: "0 0 2px" }}>☀️ 今朝のコンディション</p>
-            <p style={{ fontSize: 12, color: "#aaa", margin: 0 }}>調子・症状・集中力を記録</p>
+          <button onClick={onMorning} style={{ width: "100%", padding: "18px 20px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "transparent", textAlign: "left", cursor: "pointer" }}>
+            <p style={{ fontSize: 14, fontWeight: 500, color: "#111", margin: "0 0 3px", letterSpacing: "-0.01em" }}>Morning condition</p>
+            <p style={{ fontSize: 11, color: "#bbb", margin: 0, letterSpacing: "0.02em" }}>Mood, symptoms, and focus</p>
           </button>
         </div>
       </div>
